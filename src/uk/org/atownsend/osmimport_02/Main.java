@@ -2515,6 +2515,13 @@ public class Main
 						contentInBytes = rteptLine.getBytes();
 						newGpxFileStream.write(contentInBytes);
 					}
+					else if ( l3_item_type.equals( "time" ))
+					{
+						debugout( Log_Informational_2, "time: " + myGetNodeValue( this_l3_item ) );
+						rteptLine = "      <time>" + myGetNodeValue( this_l3_item ) + "</time>\n";
+						contentInBytes = rteptLine.getBytes();
+						newGpxFileStream.write(contentInBytes);
+					}
 					else if ( l3_item_type.equals( "sym" ))
 					{
 						debugout( Log_Informational_2, "sym: " + myGetNodeValue( this_l3_item ) );
@@ -2631,7 +2638,7 @@ public class Main
 	{
 		/* ------------------------------------------------------------------------------------------------------------
 		 * This is set if we find a "name" match when processing the old GPX file.  When we do, we also want to 
-		 * transfer any of "cmt", "desc", and "sym" that occur. 
+		 * transfer any of "cmt", "desc", "time" and "sym" that occur. 
 		 * 
 		 * processOldGpxXmlWaypointChildren is called per XML node that has valid lat and lon attributes, so this is
 		 * reset to false before processing each GPX waypoint.
@@ -2751,6 +2758,19 @@ public class Main
 					
 					debugout( Log_Informational_2, "desc: " + myGetNodeValue( this_l2_item ) );
 				}
+				else if ( l2_item_type.equals( "time" ))
+				{
+					if ( transferFromInputGpx )
+					{
+						waypoint.setTime( inputGpxWaypointMap.get( waypoint.getWaypointNumber()).getTime() );
+					}
+					else
+					{
+						waypoint.setTime( myGetNodeValue( this_l2_item ) );
+					}
+					
+					debugout( Log_Informational_2, "time: " + myGetNodeValue( this_l2_item ) );
+				}
 				else if ( l2_item_type.equals( "sym" ))
 				{
 					if ( transferFromInputGpx )
@@ -2840,6 +2860,13 @@ public class Main
 				newGpxFileStream.write(contentInBytes);
 			}
 			
+			if ( waypoint.getTime() != "" )
+			{
+				wptLine = "    <time>" + waypoint.getTime() + "</time>\n";
+				contentInBytes = wptLine.getBytes();
+				newGpxFileStream.write(contentInBytes);
+			}
+			
 			if ( waypoint.getSym() != "" )
 			{
 				wptLine = "    <sym>" + waypoint.getSym() + "</sym>\n";
@@ -2847,7 +2874,7 @@ public class Main
 				newGpxFileStream.write(contentInBytes);
 			}
 			
-			// I don't believe that we need "extensions" or "time".
+			// I don't believe that we need "extensions".
 			
 			String wptTrailer = "  </wpt>\n\n";
 			contentInBytes = wptTrailer.getBytes();
@@ -3102,6 +3129,11 @@ public class Main
 				{
 					waypoint.setDesc( myGetNodeValue( this_l2_item ) );
 					debugout( Log_Informational_2, "desc: " + myGetNodeValue( this_l2_item ) );
+				}
+				else if ( l2_item_type.equals( "time" ))
+				{
+					waypoint.setTime( myGetNodeValue( this_l2_item ) );
+					debugout( Log_Informational_2, "time: " + myGetNodeValue( this_l2_item ) );
 				}
 				else if ( l2_item_type.equals( "sym" ))
 				{

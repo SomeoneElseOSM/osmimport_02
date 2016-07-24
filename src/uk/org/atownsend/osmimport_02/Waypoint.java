@@ -37,6 +37,7 @@ public class Waypoint
 	
 	private String cmt;
 	private String desc;
+	private String time;
 	private String sym;
 	private String ele;
 	private String fileNameFoundIn;
@@ -47,8 +48,12 @@ public class Waypoint
 		this.twoLetterAbbreviation = "";
 		this.waypointNumber = "";
 		
+		this.lat = "";
+		this.lon = "";
+
 		this.cmt = "";
 		this.desc = "";
+		this.time = "";
 		this.sym = "";
 		this.ele = "";
 		this.fileNameFoundIn = "";
@@ -57,7 +62,7 @@ public class Waypoint
 	
 	public Waypoint( String initial, String twoLetterAbbreviation, String waypointNumber, 
 			String lat, String lon, 
-			String cmt, String desc, String sym, String ele, String fileNameFoundIn ) 
+			String cmt, String desc, String time, String sym, String ele, String fileNameFoundIn ) 
 	{
 		/* ------------------------------------------------------------------------------
 		 * "key" information we uppercase at this point.
@@ -71,6 +76,7 @@ public class Waypoint
 		
 		this.cmt = cmt;
 		this.desc = desc;
+		this.time = time;
 		
 		/* ------------------------------------------------------------------------------
 		 * There's an argument that the symbol should also be stored uppercased perhaps?
@@ -194,6 +200,22 @@ public class Waypoint
 	public void setDesc( String desc ) 
 	{
 		this.desc = desc;
+	}
+
+	/**
+	 * @return the time
+	 */
+	public String getTime() 
+	{
+		return time;
+	}
+
+	/**
+	 * @param time the time to set
+	 */
+	public void setTime( String time ) 
+	{
+		this.time = time;
 	}
 
 	/**

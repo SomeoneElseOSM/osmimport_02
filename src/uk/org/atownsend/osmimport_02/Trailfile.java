@@ -56,7 +56,8 @@ public class Trailfile
 		yyyymmdd = passed_yyyymmdd.toUpperCase();
 		hhmmss = passed_hhmmss.toUpperCase();
 		//qqq08 probably should not do this
-		fileName = passed_fileName.toUpperCase();
+//		fileName = passed_fileName.toUpperCase();
+		fileName = passed_fileName;
 
 		/* ------------------------------------------------------------------------------
 		 * If the "hhmmss" value is passed as a single character, it'll be "A", "B", etc.
@@ -145,6 +146,7 @@ public class Trailfile
 	public void setFileName( String passed_fileName ) 
 	{
 		//qqq08 probably should not do this
-		this.fileName = passed_fileName.toUpperCase();
+//		this.fileName = passed_fileName.toUpperCase();
+		this.fileName = passed_fileName;
 	}
 }

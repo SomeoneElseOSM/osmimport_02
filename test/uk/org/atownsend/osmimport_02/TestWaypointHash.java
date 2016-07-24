@@ -15,7 +15,7 @@ public class TestWaypointHash
 	@Test
 	public void testPut1() 
 	{
-		Waypoint waypoint1 = new Waypoint( "S", "AB", "123456", "51.0", "-1.23", "Comment", "Desc", "Sym", "0.00", "" );
+		Waypoint waypoint1 = new Waypoint( "S", "AB", "123456", "51.0", "-1.23", "Comment", "Desc", "Time", "Sym", "0.00", "" );
 		Waypoint waypoint2 = new Waypoint();
 		
 		WaypointHashtable waypointMap = new WaypointHashtable();
@@ -29,6 +29,7 @@ public class TestWaypointHash
 		assertTrue( waypoint2.getLon().equals( "-1.23" ));
 		assertTrue( waypoint2.getCmt().equals( "Comment" ));
 		assertTrue( waypoint2.getDesc().equals( "Desc" ));
+		assertTrue( waypoint2.getTime().equals( "Time" ));
 		assertTrue( waypoint2.getSym().equals( "Sym" ));
 		assertTrue( waypoint2.getEle().equals( "0.00" ));
 		assertTrue( waypoint2.getFileNameFoundIn().equals( "" ));
@@ -42,7 +43,7 @@ public class TestWaypointHash
 	@Test
 	public void testPut2() 
 	{
-		Waypoint waypoint1 = new Waypoint( "s", "ab", "ASDfgh", "51.0", "-1.23", "Comment", "Desc", "Sym", "0.00", "" );
+		Waypoint waypoint1 = new Waypoint( "s", "ab", "ASDfgh", "51.0", "-1.23", "Comment", "Desc", "Time", "Sym", "0.00", "" );
 		Waypoint waypoint2 = new Waypoint();
 		
 		WaypointHashtable waypointMap = new WaypointHashtable();
@@ -56,6 +57,7 @@ public class TestWaypointHash
 		assertTrue( waypoint2.getLon().equals( "-1.23" ));
 		assertTrue( waypoint2.getCmt().equals( "Comment" ));
 		assertTrue( waypoint2.getDesc().equals( "Desc" ));
+		assertTrue( waypoint2.getTime().equals( "Time" ));
 		assertTrue( waypoint2.getSym().equals( "Sym" ));
 		assertTrue( waypoint2.getEle().equals( "0.00" ));
 		//qqq07 probably should test something valid here
@@ -70,8 +72,8 @@ public class TestWaypointHash
 	@Test
 	public void testPut3() 
 	{
-		Waypoint waypoint1 = new Waypoint( "S", "AB", "123456", "51.1", "-1.21", "OldComment", "OldDesc", "OldSym", "0.01", "OldF" );
-		Waypoint waypoint2 = new Waypoint( "D", "AC", "123456", "51.2", "-1.22", "NewComment", "NewDesc", "NewSym", "0.02", "NewF" );
+		Waypoint waypoint1 = new Waypoint( "S", "AB", "123456", "51.1", "-1.21", "OldComment", "OldDesc", "OldTime", "OldSym", "0.01", "OldF" );
+		Waypoint waypoint2 = new Waypoint( "D", "AC", "123456", "51.2", "-1.22", "NewComment", "NewDesc", "NewTime", "NewSym", "0.02", "NewF" );
 		
 		WaypointHashtable waypointMap = new WaypointHashtable();
 		waypointMap.put( waypoint1 );
@@ -85,6 +87,7 @@ public class TestWaypointHash
 		assertTrue( waypoint3.getLon().equals( "-1.22" ));
 		assertTrue( waypoint3.getCmt().equals( "NewComment" ));
 		assertTrue( waypoint3.getDesc().equals( "NewDesc" ));
+		assertTrue( waypoint3.getTime().equals( "NewTime" ));
 		assertTrue( waypoint3.getSym().equals( "NewSym" ));
 		assertTrue( waypoint3.getEle().equals( "0.02" ));
 		assertTrue( waypoint3.getFileNameFoundIn().equals( "NewF" ));

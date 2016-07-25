@@ -2907,9 +2907,12 @@ public class Main
 				newGpxFileStream.write(contentInBytes);
 			}
 			
+			/* ------------------------------------------------------------------------------------------------------------
+			 * We don't write out "time" for "time" points but "desc" so that MapSource can load the data.
+			 * ------------------------------------------------------------------------------------------------------------ */
 			if ( waypoint.getTime() != "" )
 			{
-				wptLine = "    <time>" + waypoint.getTime() + "</time>\n";
+				wptLine = "    <desc>" + waypoint.getTime() + "</desc>\n";
 				contentInBytes = wptLine.getBytes();
 				newGpxFileStream.write(contentInBytes);
 			}

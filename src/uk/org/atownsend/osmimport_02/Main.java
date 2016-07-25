@@ -1586,105 +1586,110 @@ public class Main
 
 	void processInputGpxXmlTrk( Node this_l1_item, WaypointHashtable inputGpxWaypointMap )
 	{
-		boolean newTrkCntrOk = incNewTrkCntr();
-
-		if ( newTrkCntrOk )
+		boolean newTrkCntrOk = false;
+		String trkLine = "";
+		byte[] contentInBytes = trkLine.getBytes();
+		
+		try
 		{
-			debugout( Log_Informational_2, "Resultant track: TR" + getNewTrkCntrString() );
-			createNewTrackFile();
-
-			debugout( Log_Informational_2, "last_sos_cntr: " + last_sos_cntr + ", next_sos_cntr: " + new_sos_cntr );
-			for ( int cntr_1 = last_sos_cntr+1; cntr_1 <= new_sos_cntr; cntr_1++ )
+			/* ------------------------------------------------------------------------------------------------------------
+			 * A "trk" is a track
+			 * we do need to process it.
+			 * We're not expecting attributes for a track.
+			 * ------------------------------------------------------------------------------------------------------------ */
+			NodeList level_2_xmlnodes = this_l1_item.getChildNodes();
+			int num_l2_xmlnodes = level_2_xmlnodes.getLength();
+			debugout( Log_Informational_2, "processInputGpxXmlTrk() L2 nodes found: " + num_l2_xmlnodes );
+				
+			for ( int cntr_2 = 0; cntr_2 < num_l2_xmlnodes; ++cntr_2 ) 
 			{
-				Waypoint waypoint = inputGpxWaypointMap.get( String.format( "%06d", cntr_1 ) );
-				
-				if ( waypoint == null )
-				{
-					debugout( Log_Error, "processInputGpxXmlTrk:  Expected but not found: " + String.format( "%06d", cntr_1 ) );
-				}
-				else
-				{
-					writeWptToGpx( waypoint );
-				}
-			}
-
-			try
-			{
-				String trkLine = "    <trk>\n";
-				byte[] contentInBytes = trkLine.getBytes();
-				newGpxFileStream.write(contentInBytes);
-				
-				/* ------------------------------------------------------------------------------------------------------------
-				 * A "trk" is a track
-				 * we do need to process it.
-				 * We're not expecting attributes for a track.
-				 * ------------------------------------------------------------------------------------------------------------ */
-				NodeList level_2_xmlnodes = this_l1_item.getChildNodes();
-				int num_l2_xmlnodes = level_2_xmlnodes.getLength();
-				debugout( Log_Informational_2, "processInputGpxXmlTrk() L2 nodes found: " + num_l2_xmlnodes );
-				
-				for ( int cntr_2 = 0; cntr_2 < num_l2_xmlnodes; ++cntr_2 ) 
-				{
-					Node this_l2_item = level_2_xmlnodes.item( cntr_2 );
-					String l2_item_type = this_l2_item.getNodeName();
+				Node this_l2_item = level_2_xmlnodes.item( cntr_2 );
+				String l2_item_type = this_l2_item.getNodeName();
 					
-					if ( !l2_item_type.equals("#text" ))
+				if ( !l2_item_type.equals("#text" ))
+				{
+					/* ------------------------------------------------------------------------------------------------------------
+					 * Here we're expecting most but not necessarily all of:
+					 * 
+					 * name
+					 * extensions
+					 * trkseg
+					 * qqq03 what other parts of a waypoint in the GPX might we see?
+					 * ------------------------------------------------------------------------------------------------------------ */
+					if ( l2_item_type.equals( "name" ))
 					{
 						/* ------------------------------------------------------------------------------------------------------------
-						 * Here we're expecting most but not necessarily all of:
-						 * 
-						 * name
-						 * extensions
-						 * trkseg
-						 * qqq03 what other parts of a waypoint in the GPX might we see?
+						 * Show the name in debug, but we won't actually use it.
 						 * ------------------------------------------------------------------------------------------------------------ */
-						if ( l2_item_type.equals( "name" ))
+						debugout( Log_Informational_2, "name: " + myGetNodeValue( this_l2_item ) );
+					} 
+					else if ( l2_item_type.equals( "trkseg" ))
+					{
+						debugout( Log_Informational_2, "trkseg found" );
+						newTrkCntrOk = incNewTrkCntr();
+
+						if ( newTrkCntrOk )
 						{
-							/* ------------------------------------------------------------------------------------------------------------
-							 * Show the name in debug, but we won't actually use it.
-							 * ------------------------------------------------------------------------------------------------------------ */
-							debugout( Log_Informational_2, "name: " + myGetNodeValue( this_l2_item ) );
+							debugout( Log_Informational_2, "Resultant track: TR" + getNewTrkCntrString() );
+							createNewTrackFile();
+
+							debugout( Log_Informational_2, "last_sos_cntr: " + last_sos_cntr + ", next_sos_cntr: " + new_sos_cntr );
+							for ( int cntr_1 = last_sos_cntr+1; cntr_1 <= new_sos_cntr; cntr_1++ )
+							{
+								Waypoint waypoint = inputGpxWaypointMap.get( String.format( "%06d", cntr_1 ) );
+									
+								if ( waypoint == null )
+								{
+									debugout( Log_Error, "processInputGpxXmlTrk:  Expected but not found: " + String.format( "%06d", cntr_1 ) );
+								}
+								else
+								{
+									writeWptToGpx( waypoint );
+								}
+							} // for
+
+							trkLine = "    <trk>\n";
+							contentInBytes = trkLine.getBytes();
+							newGpxFileStream.write(contentInBytes);
+
 							trkLine = "      <name>" + "TR" + getNewTrkCntrString() + "</name>\n";
 							contentInBytes = trkLine.getBytes();
 							newGpxFileStream.write(contentInBytes);
-						} 
-						else if ( l2_item_type.equals( "trkseg" ))
-						{
-							debugout( Log_Informational_2, "trkseg found" );
+
 							processOldGpxXmlTrksegChildren( this_l2_item );
-							}
-						else if ( l2_item_type.equals( "extensions" ))
-						{
-							/* ------------------------------------------------------------------------------------------------------------
-							* We can ignore "extensions"
-							* ------------------------------------------------------------------------------------------------------------ */
+							
+							trkLine = "    </trk>\n";
+							contentInBytes = trkLine.getBytes();
+							newGpxFileStream.write(contentInBytes);
+							closeNewGpxFile();
 						}
 						else
 						{
-							/* ------------------------------------------------------------------------------------------------------------
-							* Something else that we're not expecting, that doesn't necessarily imply an error
-							* ------------------------------------------------------------------------------------------------------------ */
-							debugout( Log_Informational_1, "processInputGpxXmlTrk() l2_item_type: " + l2_item_type + " not known" );
+							debugout( Log_Error, "Error calculating key for storing track: " + getNewTrkCntrString() );
 						}
-					} // not #text
-				} // for the children of a trk
-				
-				trkLine = "    </trk>\n";
-				contentInBytes = trkLine.getBytes();
-				newGpxFileStream.write(contentInBytes);
-			    closeNewGpxFile();
-			}
-			catch( Exception ex )
-			{
-				/* ------------------------------------------------------------------------------
-				 * If there's an error opening or processing the GPX file here
-				 * ------------------------------------------------------------------------------ */
-				debugout( Log_Error, "processInputGpxXmlTrk: Error writing TRK to  GPX file: " + ex.getMessage() );
-			}
+					}
+					else if ( l2_item_type.equals( "extensions" ))
+					{
+						/* ------------------------------------------------------------------------------------------------------------
+						 * We can ignore "extensions"
+						 * ------------------------------------------------------------------------------------------------------------ */
+					}
+					else
+					{
+						/* ------------------------------------------------------------------------------------------------------------
+						 * Something else that we're not expecting, that doesn't necessarily imply an error
+						 * ------------------------------------------------------------------------------------------------------------ */
+						debugout( Log_Informational_1, "processInputGpxXmlTrk() l2_item_type: " + l2_item_type + " not known" );
+					}
+				} // not #text
+			} // for the children of a trk
 		}
-		else
+		catch( Exception ex )
 		{
-			debugout( Log_Informational_1, "Error calculating key for storing track: " + getNewTrkCntrString() );
+			/* ------------------------------------------------------------------------------
+			 * If there's an error opening or processing the GPX file here
+			 * ------------------------------------------------------------------------------ */
+			debugout( Log_Error, "processInputGpxXmlTrk: Error writing TRK to  GPX file: " + ex.getMessage() );
 		}
 	}
 	

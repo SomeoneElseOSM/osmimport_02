@@ -44,8 +44,9 @@ public class Main
 
 	final static String param_debug = "-b=";		// It's "-b" rather than "-d" because "-d" is used for "description file".
 	final static String param_cntr = "-c=";			// "counter file"
-	final static String param_input = "-i=";		// "input GPX file"
-	final static String param_description = "-d=";	// "description file" (typically a saved email)
+	final static String param_input_main = "-i=";	// "main input GPX file" (possibly waypoints and definitely track)
+	final static String param_input_sup1 = "-j=";	// "supplementary input GPX file" (optional, waypoints only)
+	final static String param_description = "-d=";	// "description file" (typically a saved plain text email)
 	final static String param_t = "-t=";			// The two-letter trail name that "Trail Head" is to be saved as
 	final static String param_y = "-y=";			// (and other trail names for other symbols - "Bike Trail") ...
 	final static String param_u = "-u=";			// "Skull and Crossbones"
@@ -62,7 +63,8 @@ public class Main
 	private int last_trk_cntr = 0;
 	private int new_sos_cntr = 0;
 	private int new_trk_cntr = 0;
-	private String arg_input_file = "";			// Default to no input file
+	private String arg_input_file_main = "";	// Default to no main input file
+	private String arg_input_file_sup1 = "";	// Default to no supplementary input file
 	private String arg_description_file = "";	// Default to no description file
 	private String arg_t = "";					// Default to no "trail" 2la
 	private String arg_y = "";
@@ -85,17 +87,20 @@ public class Main
 	private boolean args_invalid = false; 
 	
 	File myCntrFile;						// The File opened to read the current counter 
-	File myInputFile;						// The File opened to read the GPX file
+	File myInputFileMain;					// The File opened to read the main GPX file
+	File myInputFileSup1;					// The File opened to read the supplementary GPX file
 	File myDescriptionFile;					// The File opened to read the description info
 	File myPathFile;						// The File opened to read a directory for existing GPX files
 	
 	TrailfileHashtable myTrailfileHashtable;	// Used to store any trailfiles that we find on disk.
 
 	/* ------------------------------------------------------------------------------
-	 * The root element of the GPX that we've read in.  It's populated as part of the
-	 * "getParams" process.
+	 * mainGpxRootElement is the root element of the main GPX file that we've read in.  
+	 * It's populated as part of the "getParams" process.
+	 * Other root elements are for supplementary GPX files
 	 * ------------------------------------------------------------------------------ */
-	Element gpxRootElement = null;					// 
+	Element mainGpxRootElement = null;
+	Element sup1GpxRootElement = null;
 
 	/* ------------------------------------------------------------------------------
 	 * This contains extended descriptions read from a description file if 
@@ -149,9 +154,18 @@ public class Main
 	/* ------------------------------------------------------------------------------
 	 * Also used for testing only 
 	 * ------------------------------------------------------------------------------ */
-	public Element getGpxRootElement()
+	public Element getMainGpxRootElement()
 	{
-		return gpxRootElement;
+		return mainGpxRootElement;
+	}
+	
+	
+	/* ------------------------------------------------------------------------------
+	 * Also used for testing only 
+	 * ------------------------------------------------------------------------------ */
+	public Element getSup1GpxRootElement()
+	{
+		return sup1GpxRootElement;
 	}
 	
 	
@@ -189,9 +203,9 @@ public class Main
 	}
 
 	
-	public String getInputFile()
+	public String getInputFileMain()
 	{
-		return arg_input_file;
+		return arg_input_file_main;
 	}
 
 	
@@ -1004,7 +1018,7 @@ public class Main
 /* ------------------------------------------------------------------------------
  * If we have some XML data, process it.
  * ------------------------------------------------------------------------------ */
-		if (( m.gpxRootElement != null ) && ( m.args_invalid == false )) 
+		if (( m.mainGpxRootElement != null ) && ( m.args_invalid == false )) 
 		{
 			m.processInputGpxXml();
 		}
@@ -1115,23 +1129,23 @@ public class Main
 				} // Counter file
 
 				/* ------------------------------------------------------------------------------
-				 * Input file containing the GPX to process
+				 * Input file containing the main GPX to process
 				 * 
 				 * If specified, we read the file into an HTML document here.
 				 * ------------------------------------------------------------------------------ */
-				if ( args[i].startsWith( param_input ))
+				if ( args[i].startsWith( param_input_main ))
 				{	
-					arg_input_file = args[i].substring( param_input.length() );
+					arg_input_file_main = args[i].substring( param_input_main.length() );
 
 					try
 					{
-						myInputFile = new File( arg_input_file );
+						myInputFileMain = new File( arg_input_file_main );
 					    DocumentBuilderFactory myFactory = DocumentBuilderFactory.newInstance();
 					    DocumentBuilder myBuilder = myFactory.newDocumentBuilder();
-					    InputStream inputStream = new FileInputStream( myInputFile );
+					    InputStream inputStream = new FileInputStream( myInputFileMain );
 					
 					    Document myDocument = myBuilder.parse( inputStream );
-					    gpxRootElement = myDocument.getDocumentElement();
+					    mainGpxRootElement = myDocument.getDocumentElement();
 					}
 					catch( Exception ex )
 					{
@@ -1139,15 +1153,48 @@ public class Main
 						 * If there's an error opening or processing the input file, don't pretend 
 						 * that it wasn't specified on the command line. 
 						 * ------------------------------------------------------------------------------ */
-						arg_input_file = "!file";
+						arg_input_file_main = "!file";
 						args_invalid = true;
 
-						debugout( Log_Serious, "Error opening input file: " + ex.getMessage() );
+						debugout( Log_Serious, "Error opening main input file: " + ex.getMessage() );
 					}
 					
-					debugout( Log_Informational_2, "arg_input_file: " + arg_input_file );
-					debugout( Log_Informational_2, "arg_input_file length: " + arg_input_file.length() );
-				} // Input file
+					debugout( Log_Informational_2, "arg_input_file_main: " + arg_input_file_main );
+					debugout( Log_Informational_2, "arg_input_file_main length: " + arg_input_file_main.length() );
+				} // Main Input file
+
+				/* ------------------------------------------------------------------------------
+				 * Supplementary input file containing another GPX to process
+				 * 
+				 * If specified, we read the file into an HTML document here.
+				 * ------------------------------------------------------------------------------ */
+				if ( args[i].startsWith( param_input_sup1 ))
+				{	
+					arg_input_file_sup1 = args[i].substring( param_input_sup1.length() );
+
+					try
+					{
+						myInputFileSup1 = new File( arg_input_file_sup1 );
+					    DocumentBuilderFactory myFactory = DocumentBuilderFactory.newInstance();
+					    DocumentBuilder myBuilder = myFactory.newDocumentBuilder();
+					    InputStream inputStream = new FileInputStream( myInputFileSup1 );
+					
+					    Document myDocument = myBuilder.parse( inputStream );
+					    sup1GpxRootElement = myDocument.getDocumentElement();
+					}
+					catch( Exception ex )
+					{
+						/* ------------------------------------------------------------------------------
+						 * If there's an error opening or processing the supplementary input file,  
+						 * just pretend that it wasn't specified on the command line. 
+						 * ------------------------------------------------------------------------------ */
+						arg_input_file_sup1 = "";
+						debugout( Log_Error, "Error opening supplementary input file: " + ex.getMessage() );
+					}
+					
+					debugout( Log_Informational_2, "arg_input_file: " + arg_input_file_main );
+					debugout( Log_Informational_2, "arg_input_file length: " + arg_input_file_main.length() );
+				} // Supplementary Input file
 
 				/* ------------------------------------------------------------------------------
 				 * Description file containing information to add to the GPX
@@ -1936,7 +1983,7 @@ public class Main
 	 * ------------------------------------------------------------------------------ */
 	void processOldGpxXml( Element passed_oldGpxRootElement, String passedFound2la, WaypointHashtable inputGpxWaypointMap )
 	{
-		if ( gpxRootElement.getNodeType() == Node.ELEMENT_NODE ) 
+		if ( mainGpxRootElement.getNodeType() == Node.ELEMENT_NODE ) 
 		{
 			debugout( Log_Informational_2, "element" );
 			
@@ -2890,17 +2937,9 @@ public class Main
 	}
 	
 	
-	void processInputGpxXml2( NodeList level_1_xmlnodes, int num_l1_xmlnodes )
+	void processInputGpxXml2a( NodeList level_1_xmlnodes, int num_l1_xmlnodes, 
+							  WaypointHashtable inputGpxWaypointMap, TrailHashset trail3laHashSet, TrailHashset trail2laHashSet )
 	{
-		/* ------------------------------------------------------------------------------------------------------------
-		 * Initialise the waypoint map into which we'll store new waypoints, 
-		 * and the sets in which we'll store details of which trail abbreviations we have seen so far - both the 
-		 * "3-letter" version printed out for the user and the "2-letter" version used for locating files on disk.
-		 * ------------------------------------------------------------------------------------------------------------ */
-		WaypointHashtable inputGpxWaypointMap = new WaypointHashtable();
-		TrailHashset trail3laHashSet = new TrailHashset();
-		TrailHashset trail2laHashSet = new TrailHashset();
-	
 		/* ------------------------------------------------------------------------------------------------------------
 		 * Read through all the nodes in the GPX and populate waypointMap, and also trail3laHashSet and trail2laHashSet.
 		 * 
@@ -2909,7 +2948,11 @@ public class Main
 		 * for new points".
 		 * ------------------------------------------------------------------------------------------------------------ */
 		processInputGpxXml3( level_1_xmlnodes, num_l1_xmlnodes, inputGpxWaypointMap, trail3laHashSet, trail2laHashSet, true, true );
-		
+	}
+
+	
+	void processInputGpxXml2b( WaypointHashtable inputGpxWaypointMap, TrailHashset trail3laHashSet, TrailHashset trail2laHashSet )
+	{
 		/* ------------------------------------------------------------------------------------------------------------
 		 * trail3laHashSet has been updated with details of the various trails that we have found (including a leading
 		 * "D" or "S"). A line is written to stdout for the user's benefit about this.
@@ -2946,13 +2989,13 @@ public class Main
 	 * ------------------------------------------------------------------------------ */
 	void processInputGpxXml()
 	{
-		if ( gpxRootElement.getNodeType() == Node.ELEMENT_NODE ) 
+		if ( mainGpxRootElement.getNodeType() == Node.ELEMENT_NODE ) 
 		{
 			debugout( Log_Informational_2, "element" );
 			
-			NodeList level_1_xmlnodes = gpxRootElement.getChildNodes();
-			int num_l1_xmlnodes = level_1_xmlnodes.getLength();
-			debugout( Log_Informational_2, "Notes L1 nodes found: " + num_l1_xmlnodes );
+			NodeList main_level_1_xmlnodes = mainGpxRootElement.getChildNodes();
+			int main_num_l1_xmlnodes = main_level_1_xmlnodes.getLength();
+			debugout( Log_Informational_2, "Notes L1 nodes found: " + main_num_l1_xmlnodes );
 
 			/* ------------------------------------------------------------------------------
 			 * Initialise the SOS and TRK counters.
@@ -2962,7 +3005,33 @@ public class Main
 			
 			if ( newSosCntrOk && newTrkCntrOk)
 			{
-				processInputGpxXml2( level_1_xmlnodes, num_l1_xmlnodes );
+				/* ------------------------------------------------------------------------------------------------------------
+				 * Initialise the waypoint map into which we'll store new waypoints, 
+				 * and the sets in which we'll store details of which trail abbreviations we have seen so far - both the 
+				 * "3-letter" version printed out for the user and the "2-letter" version used for locating files on disk.
+				 * ------------------------------------------------------------------------------------------------------------ */
+				WaypointHashtable inputGpxWaypointMap = new WaypointHashtable();
+				TrailHashset trail3laHashSet = new TrailHashset();
+				TrailHashset trail2laHashSet = new TrailHashset();
+
+				/* ------------------------------------------------------------------------------------------------------------
+				 * The "supplementary" GPX file should have only waypoints in it.  Process it first so that all waypoints are
+				 * known about before looking at tracks. 
+				 * ------------------------------------------------------------------------------------------------------------ */
+				if ( sup1GpxRootElement != null )
+				{
+					NodeList sup1_level_1_xmlnodes = sup1GpxRootElement.getChildNodes();
+					int sup1_num_l1_xmlnodes = sup1_level_1_xmlnodes.getLength();
+					processInputGpxXml2a( sup1_level_1_xmlnodes, sup1_num_l1_xmlnodes, inputGpxWaypointMap, trail3laHashSet, trail2laHashSet );
+				}
+
+				/* ------------------------------------------------------------------------------------------------------------
+				 * The "main" GPX file may have waypoints and tracks in it.  
+				 * We need to process tracks only after all waypoints. 
+				 * ------------------------------------------------------------------------------------------------------------ */
+				processInputGpxXml2a( main_level_1_xmlnodes, main_num_l1_xmlnodes, inputGpxWaypointMap, trail3laHashSet, trail2laHashSet );
+
+				processInputGpxXml2b( inputGpxWaypointMap, trail3laHashSet, trail2laHashSet );
 				
 				/* ------------------------------------------------------------------------------
 				 * If we don't have a valid arg_path then we won't have written out any changes

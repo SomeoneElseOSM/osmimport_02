@@ -267,7 +267,7 @@ public class TestParams
 		/* ------------------------------------------------------------------------------
 		 * The gpxRootElement should be null as we have not read a file in.
 		 * ------------------------------------------------------------------------------ */
-		assertTrue( testMain.getGpxRootElement() == null );
+		assertTrue( testMain.getMainGpxRootElement() == null );
 	}
 
 
@@ -290,7 +290,7 @@ public class TestParams
 		/* ------------------------------------------------------------------------------
 		 * The gpxRootElement should also be null as we have not read an input file in.
 		 * ------------------------------------------------------------------------------ */
-		assertTrue( testMain.getGpxRootElement() == null );
+		assertTrue( testMain.getMainGpxRootElement() == null );
 	}
 
 	
@@ -432,7 +432,7 @@ public class TestParams
 		/* ------------------------------------------------------------------------------
 		 * If we can't open or read the file, we should know that
 		 * ------------------------------------------------------------------------------ */
-		assertTrue( testMain.getInputFile(), testMain.getInputFile().equals( "!file" ));
+		assertTrue( testMain.getInputFileMain(), testMain.getInputFileMain().equals( "!file" ));
 	}
 
 	
@@ -450,12 +450,12 @@ public class TestParams
 		/* ------------------------------------------------------------------------------
 		 * We shouldn't get a "can't open file" error here.
 		 * ------------------------------------------------------------------------------ */
-		assertTrue( testMain.getLastError() + " " + testMain.getInputFile(), !testMain.getInputFile().equals( "!file" ));
+		assertTrue( testMain.getLastError() + " " + testMain.getInputFileMain(), !testMain.getInputFileMain().equals( "!file" ));
 		
 		/* ------------------------------------------------------------------------------
 		 * The gpxRootElement should not be null after we've read a file in
 		 * ------------------------------------------------------------------------------ */
-		assertTrue( testMain.getGpxRootElement() != null );
+		assertTrue( testMain.getMainGpxRootElement() != null );
 	}
 
 

@@ -477,7 +477,7 @@ public class Main
  * Similarly the "TRK" counter is used to number Garmin tracks, which will end up
  * being named something like "TR1234".
  * 
- * "TR" just means "Track".
+ * "TS" just means "Track".
  * 
  *  The six-digit number is unique for each track.  It's designed to
  *  last about ten years at current mapping frequency.
@@ -1652,7 +1652,7 @@ public class Main
 							contentInBytes = trkLine.getBytes();
 							newGpxFileStream.write(contentInBytes);
 
-							trkLine = "      <name>" + "TR" + getNewTrkCntrString() + "</name>\n";
+							trkLine = "      <name>" + "TS" + getNewTrkCntrString() + "</name>\n";
 							contentInBytes = trkLine.getBytes();
 							newGpxFileStream.write(contentInBytes);
 
@@ -1926,7 +1926,7 @@ public class Main
 	 * ------------------------------------------------------------------------------ */
 	void createNewTrackFile()
 	{
-		String newGpxFileName = arg_path + "TR" + getNewTrkCntrString() + "a.GPX";
+		String newGpxFileName = arg_path + "TS" + getNewTrkCntrString() + "a.GPX";
 		createNewFileCommon( newGpxFileName);
 	}
 	

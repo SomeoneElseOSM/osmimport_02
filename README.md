@@ -1,5 +1,5 @@
-osmimport_02
-============
+# osmimport_02
+
 This processes a GPX file from a Garmin GPS, and generates unique track files from it, each containing all of
 the new waypoints in the GPX.
 
@@ -27,4 +27,21 @@ Example command line:
 java -jar c:\Utils\osmimport_02.jar -c=c:\Temp\osm\cntr.txt -d=c:\temp\osm\20140525a.eml -k=c:\temp\osm\ -i=c:\temp\osm\20140525b.gpx -t=RH -b=5
 
 This means use "c:\Temp\osm\cntr.txt" as the counter file, use "c:\temp\osm\20140525a.eml" as the description file containing comments and "c:\temp\osm\20140525b.gpx" as the input GPX containing Waypoints, Routes and Tracks.  "-t=RH" means that a file SRH_yyyymmdd_hhmmss.gpx will be created (using the current data and time) incorporating any new "Trail" points ("-t" is interpreted as "Trail") and also the contents of the most recent existing SRH_yyyymmdd_hhmmss.gpx file.  "-b=5" is just the level of debug output produced (the higher the number, the more verbose).
+
+
+## Building
+
+Originally (many years ago) this was built within Eclipse - files such as the .jardesc describe how this works.
+
+To build locally from the command line with e.g. OpenJDK:
+
+    cd src
+    javac -Xlint:deprecation uk/org/atownsend/osmimport_02/*.java
+    jar cmvf META-INF/MANIFEST.MF ../osmimport_02.jar  uk/org/atownsend/osmimport_02/*class
+
+To test that the resulting .jar file runs:
+
+    java -jar ../osmimport_02.jar
+
+That won't do anything as there are no command line arguments, but it will confirm that the manifest in the .jar is working correctly.
 
